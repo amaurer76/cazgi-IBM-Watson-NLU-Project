@@ -39,38 +39,49 @@ app.get("/",(req,res)=>{
   });
 
 app.get("/url/emotion", (req,res) => {
-
-    return getNLUInstance().analyze(analyzeParams, req.query.url);
-});
-
-app.get("/url/sentiment", (req,res) => {
-    return res.send("url sentiment for "+req.query.url);
-});
-
-app.get("/text/emotion", (req,res) => {
-console.log(req);
-getNLUInstance().analyze(analyzeParams, req.query.text)
+    getNLUInstance().analyze(analyzeParams, req.query.url)
   .then(analysisResults => {
     console.log(JSON.stringify(analysisResults, null, 2));
         res.end(JSON.stringify(analysisResults, null, 2));
-        return "hey";
   })
   .catch(err => {
     console.log('error:', err);
   });
-    return ;
+});
+
+app.get("/url/sentiment", (req,res) => {
+    getNLUInstance().analyze(analyzeParams, req.query.url)
+  .then(analysisResults => {
+    console.log(JSON.stringify(analysisResults, null, 2));
+        res.end(JSON.stringify(analysisResults, null, 2));
+  })
+  .catch(err => {
+    console.log('error:', err);
+  });
+});
+
+app.get("/text/emotion", (req,res) => {
+getNLUInstance().analyze(analyzeParams, req.query.text)
+  .then(analysisResults => {
+    console.log(JSON.stringify(analysisResults, null, 2));
+        res.end(JSON.stringify(analysisResults, null, 2));
+  })
+  .catch(err => {
+    console.log('error:', err);
+  });
 });
 
 app.get("/text/sentiment", (req,res) => {
 getNLUInstance().analyze(analyzeParams, req.query.text)
   .then(analysisResults => {
     console.log(JSON.stringify(analysisResults, null, 2));
-    return analysisResults;
+        res.end(JSON.stringify(analysisResults, null, 2));
   })
   .catch(err => {
     console.log('error:', err);
   });
 });
+
 
 let server = app.listen(8080, () => {
     console.log('Listening', server.address().port)
