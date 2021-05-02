@@ -4,13 +4,17 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const analyzeParams = {
-  'url': 'www.ibm.com',
   'features': {
     'entities': {
       'emotion': true,
       'sentiment': true,
       'limit': 2,
-    }
+    },
+    'keywords': {
+      'emotion': true,
+      'sentiment': true,
+      'limit': 2,
+    },
 }
 };
 
@@ -39,10 +43,18 @@ app.get("/",(req,res)=>{
   });
 
 app.get("/url/emotion", (req,res) => {
+    analyzeParams.url = req.query.text;
     getNLUInstance().analyze(analyzeParams, req.query.url)
   .then(analysisResults => {
-    console.log(JSON.stringify(analysisResults, null, 2));
-        res.end(JSON.stringify(analysisResults, null, 2));
+    var result = {};
+    if(analysisResults.result.keywords 
+        && analysisResults.result.keywords[0] 
+        && analysisResults.result.keywords[0].emotion)
+    result.data = analysisResults.result.keywords[0].emotion;
+    else
+        result.data = [];
+    console.log(JSON.stringify(result, null, 2));
+        res.end(JSON.stringify(result, null, 2));
   })
   .catch(err => {
     console.log('error:', err);
@@ -50,10 +62,18 @@ app.get("/url/emotion", (req,res) => {
 });
 
 app.get("/url/sentiment", (req,res) => {
-    getNLUInstance().analyze(analyzeParams, req.query.url)
+        analyzeParams.text = req.query.text;
+getNLUInstance().analyze(analyzeParams)
   .then(analysisResults => {
-    console.log(JSON.stringify(analysisResults, null, 2));
-        res.end(JSON.stringify(analysisResults, null, 2));
+    var result = {};
+    if(analysisResults.result.keywords 
+        && analysisResults.result.keywords[0] 
+        && analysisResults.result.keywords[0].sentiment)
+    result.data = analysisResults.result.keywords[0].sentiment.label;
+    else
+        result.data = "neutral";
+    console.log(JSON.stringify(result, null, 2));
+        res.end(JSON.stringify(result, null, 2));
   })
   .catch(err => {
     console.log('error:', err);
@@ -61,10 +81,18 @@ app.get("/url/sentiment", (req,res) => {
 });
 
 app.get("/text/emotion", (req,res) => {
-getNLUInstance().analyze(analyzeParams, req.query.text)
+    analyzeParams.text = req.query.text;
+getNLUInstance().analyze(analyzeParams)
   .then(analysisResults => {
-    console.log(JSON.stringify(analysisResults, null, 2));
-        res.end(JSON.stringify(analysisResults, null, 2));
+    var result = {};
+    if(analysisResults.result.keywords 
+        && analysisResults.result.keywords[0] 
+        && analysisResults.result.keywords[0].emotion)
+    result.data = analysisResults.result.keywords[0].emotion;
+    else
+        result.data = [];
+    console.log(JSON.stringify(result, null, 2));
+        res.end(JSON.stringify(result, null, 2));
   })
   .catch(err => {
     console.log('error:', err);
@@ -72,10 +100,18 @@ getNLUInstance().analyze(analyzeParams, req.query.text)
 });
 
 app.get("/text/sentiment", (req,res) => {
-getNLUInstance().analyze(analyzeParams, req.query.text)
+    analyzeParams.text = req.query.text;
+getNLUInstance().analyze(analyzeParams)
   .then(analysisResults => {
-    console.log(JSON.stringify(analysisResults, null, 2));
-        res.end(JSON.stringify(analysisResults, null, 2));
+    var result = {};
+    if(analysisResults.result.keywords 
+        && analysisResults.result.keywords[0] 
+        && analysisResults.result.keywords[0].sentiment)
+    result.data = analysisResults.result.keywords[0].sentiment.label;
+    else
+        result.data = "neutral";
+    console.log(JSON.stringify(result, null, 2));
+        res.end(JSON.stringify(result, null, 2));
   })
   .catch(err => {
     console.log('error:', err);
