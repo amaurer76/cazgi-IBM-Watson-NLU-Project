@@ -43,7 +43,7 @@ app.get("/",(req,res)=>{
   });
 
 app.get("/url/emotion", (req,res) => {
-    analyzeParams.url = req.query.text;
+    analyzeParams.text = req.query.url;
     getNLUInstance().analyze(analyzeParams, req.query.url)
   .then(analysisResults => {
     var result = {};
@@ -62,16 +62,16 @@ app.get("/url/emotion", (req,res) => {
 });
 
 app.get("/url/sentiment", (req,res) => {
-        analyzeParams.text = req.query.text;
+        analyzeParams.text = req.query.url;
 getNLUInstance().analyze(analyzeParams)
   .then(analysisResults => {
     var result = {};
     if(analysisResults.result.keywords 
         && analysisResults.result.keywords[0] 
         && analysisResults.result.keywords[0].sentiment)
-    result.data = analysisResults.result.keywords[0].sentiment.label;
+    result = analysisResults.result.keywords[0].sentiment.label;
     else
-        result.data = "neutral";
+        result = "neutral";
     console.log(JSON.stringify(result, null, 2));
         res.end(JSON.stringify(result, null, 2));
   })
@@ -107,9 +107,9 @@ getNLUInstance().analyze(analyzeParams)
     if(analysisResults.result.keywords 
         && analysisResults.result.keywords[0] 
         && analysisResults.result.keywords[0].sentiment)
-    result.data = analysisResults.result.keywords[0].sentiment.label;
+    result = analysisResults.result.keywords[0].sentiment.label;
     else
-        result.data = "neutral";
+        result = "neutral";
     console.log(JSON.stringify(result, null, 2));
         res.end(JSON.stringify(result, null, 2));
   })
