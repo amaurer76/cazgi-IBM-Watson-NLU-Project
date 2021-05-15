@@ -3,7 +3,7 @@ const app = new express();
 const dotenv = require('dotenv');
 dotenv.config();
 
-const analyzeParams = {
+const analyzeParams = function(){ return {
   'features': {
     'entities': {
       'emotion': true,
@@ -15,12 +15,13 @@ const analyzeParams = {
       'sentiment': true,
       'limit': 2,
     },
+  }
 }
 };
 
 function getNLUInstance() {
-    let api_key = process.env.API_KEY;
-    let api_url = process.env.API_URL;
+    const api_key = process.env.API_KEY;
+    const api_url = process.env.API_URL;
 const NaturalLanguageUnderstandingV1 = require('ibm-watson/natural-language-understanding/v1');
 const { IamAuthenticator } = require('ibm-watson/auth');
 
@@ -43,16 +44,13 @@ app.get("/",(req,res)=>{
   });
 
 app.get("/url/emotion", (req,res) => {
-    analyzeParams.text = req.query.url;
-    getNLUInstance().analyze(analyzeParams, req.query.url)
+    var analyzeParms = analyzeParams();
+    analyzeParms.url = req.query.url;
+    getNLUInstance().analyze(analyzeParms)
   .then(analysisResults => {
     var result = {};
-    if(analysisResults.result.keywords 
-        && analysisResults.result.keywords[0] 
-        && analysisResults.result.keywords[0].emotion)
-    result.data = analysisResults.result.keywords[0].emotion;
-    else
-        result.data = [];
+    result.emotions = analysisResults.result.entities[0].emotion;
+    result.confidence = analysisResults.result.entities[0].confidence;
     console.log(JSON.stringify(result, null, 2));
         res.end(JSON.stringify(result, null, 2));
   })
@@ -62,16 +60,21 @@ app.get("/url/emotion", (req,res) => {
 });
 
 app.get("/url/sentiment", (req,res) => {
-        analyzeParams.text = req.query.url;
-getNLUInstance().analyze(analyzeParams)
+  var analyzeParms = analyzeParams();
+  analyzeParms.url = req.query.url;
+getNLUInstance().analyze(analyzeParms)
   .then(analysisResults => {
     var result = {};
     if(analysisResults.result.keywords 
         && analysisResults.result.keywords[0] 
-        && analysisResults.result.keywords[0].sentiment)
-    result = analysisResults.result.keywords[0].sentiment.label;
-    else
-        result = "neutral";
+        && analysisResults.result.keywords[0].sentiment) {
+            result.sentiment = analysisResults.result.keywords[0].sentiment.label;
+            result.confidence = -1;
+        }
+    else {
+        result.sentiment = "neutral";
+        result.confidence = -1;
+    }
     console.log(JSON.stringify(result, null, 2));
         res.end(JSON.stringify(result, null, 2));
   })
@@ -81,41 +84,43 @@ getNLUInstance().analyze(analyzeParams)
 });
 
 app.get("/text/emotion", (req,res) => {
-    analyzeParams.text = req.query.text;
-getNLUInstance().analyze(analyzeParams)
-  .then(analysisResults => {
-    var result = {};
-    if(analysisResults.result.keywords 
-        && analysisResults.result.keywords[0] 
-        && analysisResults.result.keywords[0].emotion)
-    result.data = analysisResults.result.keywords[0].emotion;
-    else
-        result.data = [];
-    console.log(JSON.stringify(result, null, 2));
-        res.end(JSON.stringify(result, null, 2));
-  })
+  var analyzeParms = analyzeParams();
+  analyzeParms.text = req.query.text;
+getNLUInstance().analyze(analyzeParms)
+.then(analysisResults => {
+  var result = {};
+  result.emotions = analysisResults.result.entities[0].emotion;
+  result.confidence = analysisResults.result.entities[0].confidence;
+  console.log(JSON.stringify(result, null, 2));
+      res.end(JSON.stringify(result, null, 2));
+})
   .catch(err => {
     console.log('error:', err);
   });
 });
 
 app.get("/text/sentiment", (req,res) => {
-    analyzeParams.text = req.query.text;
-getNLUInstance().analyze(analyzeParams)
-  .then(analysisResults => {
-    var result = {};
-    if(analysisResults.result.keywords 
-        && analysisResults.result.keywords[0] 
-        && analysisResults.result.keywords[0].sentiment)
-    result = analysisResults.result.keywords[0].sentiment.label;
-    else
-        result = "neutral";
-    console.log(JSON.stringify(result, null, 2));
-        res.end(JSON.stringify(result, null, 2));
-  })
-  .catch(err => {
-    console.log('error:', err);
-  });
+    var analyzeParms = analyzeParams();
+    analyzeParms.text = req.query.text;
+    getNLUInstance().analyze(analyzeParms)
+    .then(analysisResults => {
+      var result = {};
+      if(analysisResults.result.keywords 
+          && analysisResults.result.keywords[0] 
+          && analysisResults.result.keywords[0].sentiment) {
+              result.sentiment = analysisResults.result.keywords[0].sentiment.label;
+              result.confidence = -1;
+          }
+      else {
+          result.sentiment = "neutral";
+          result.confidence = -1;
+      }
+      console.log(JSON.stringify(result, null, 2));
+          res.end(JSON.stringify(result, null, 2));
+    })
+    .catch(err => {
+      console.log('error:', err);
+    });
 });
 
 
